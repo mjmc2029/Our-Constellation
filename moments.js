@@ -19,7 +19,7 @@ const moments = [
     photoCaptions: [
       "Three of us in this picture, and the cat's having the best day. I wonder if the cat would enjoy an andy's banana split...?"
     ], images: PHOTOS.m11 },
-  { date: "October 16", title: "Diwali ✨", caption: "Thank you for bringing me into Diwali with you. The lights, the colors, the dandiya sticks, seeing you so happy celebrating something that means so much to you. I felt so lucky to be right there next to you.",
+  { date: "October 16", title: "Diwali ✨", caption: "Thank you for bringing me into Diwali with you. The lights, the colors, the dandiya sticks, the two of us having an absolute blast together. I felt so lucky to be right there next to you.",
     photoCaptions: [
       "Worst camera angle out of these pics, but the best smiles. Proof we don't need good lighting to be happy",
       "On the way to Diwali, both of us pretending we weren't nervous about the dancing",
