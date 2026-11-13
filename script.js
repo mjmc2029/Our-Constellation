@@ -115,10 +115,19 @@ function buildStars() {
   });
 }
 
+// A chapter can give one caption per photo (m.captions); otherwise every photo
+// shares m.caption. The caption under the card follows whichever photo is on top.
+let currentMoment = null;
+function captionFor(i) {
+  const m = currentMoment;
+  return (m.captions && m.captions[i]) || m.caption || '';
+}
+
 let liftZ = 20; // rises with every lift so the last-tapped card stays on top
 
 function liftCard(card) {
   if (photoFanEl.querySelectorAll('.photo-card').length < 2) return;
+  cardCaptionEl.textContent = captionFor(Number(card.dataset.i));
   photoFanEl.querySelectorAll('.photo-card').forEach((c) => {
     c.classList.remove('lifted');
     c.style.transitionDelay = '0s';
@@ -138,6 +147,7 @@ function buildFan(images, altBase) {
   images.forEach((src, i) => {
     const card = document.createElement('div');
     card.className = 'photo-card';
+    card.dataset.i = i;
     card.style.setProperty('--fr', ((i - mid) * step).toFixed(2) + 'deg');
     card.style.transitionDelay = (i * 0.1).toFixed(2) + 's';
     card.style.zIndex = i + 1;
@@ -168,10 +178,12 @@ function buildFan(images, altBase) {
 
 function openCard(index) {
   const m = moments[index];
+  currentMoment = m;
 
   cardDateEl.textContent = m.date;
   cardTitleEl.textContent = m.title;
-  cardCaptionEl.textContent = m.caption;
+  // the last photo starts on top of the deck, so its caption shows first
+  cardCaptionEl.textContent = captionFor((m.images || [m]).length - 1);
 
   const images = m.images || [];
   photoFanEl.classList.toggle('hidden', images.length === 0);
