@@ -630,6 +630,18 @@ function markVisited(index) {
   checkSegments();
 }
 
+// The first chapter (through "One month") starts out already found and
+// connected; the visitor picks up from the fall stars onward.
+const BASELINE = 8;
+function applyBaseline(lineDelay) {
+  for (let i = 0; i < BASELINE; i++) {
+    visited.add(i);
+    starsLayerEl.children[i].classList.add('visited');
+  }
+  updateProgress();
+  setTimeout(checkSegments, lineDelay); // delay lets the lines animate in
+}
+
 function checkSegments() {
   const lines = linesLayerEl.querySelectorAll('.line');
   lines.forEach((line) => {
@@ -679,6 +691,7 @@ function resetExperience() {
   lines.forEach((line) => line.classList.remove('drawn'));
 
   updateProgress();
+  applyBaseline(60);
 }
 
 /* ====================================================================
@@ -718,6 +731,7 @@ buildBackgroundStars();
 buildLines();
 buildStars();
 updateProgress();
+applyBaseline(reduceMotion ? 0 : 700);
 if (!reduceMotion) scheduleShootingStar();
 
 // Re-lay the constellation on rotate, keeping found stars and drawn lines.
