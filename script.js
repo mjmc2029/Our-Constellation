@@ -115,28 +115,30 @@ function buildStars() {
   });
 }
 
-// A chapter can give one caption per photo (m.captions); otherwise every photo
-// shares m.caption. The caption under the card follows whichever photo is on top.
+// Tapping a photo pops it up full size with its own caption
+// (m.photoCaptions[i]); the chapter's description stays on the card underneath.
 let currentMoment = null;
-function captionFor(i) {
+const lightboxEl = document.getElementById('lightbox');
+const lightboxImgEl = document.getElementById('lightboxImg');
+const lightboxCaptionEl = document.getElementById('lightboxCaption');
+
+function openPhoto(i) {
   const m = currentMoment;
-  return (m.captions && m.captions[i]) || m.caption || '';
-}
-
-let liftZ = 20; // rises with every lift so the last-tapped card stays on top
-
-function liftCard(card) {
-  if (photoFanEl.querySelectorAll('.photo-card').length < 2) return;
-  cardCaptionEl.textContent = captionFor(Number(card.dataset.i));
-  photoFanEl.querySelectorAll('.photo-card').forEach((c) => {
-    c.classList.remove('lifted');
-    c.style.transitionDelay = '0s';
-  });
-  card.classList.add('lifted');
-  card.style.zIndex = ++liftZ;
+  const caption = (m.photoCaptions && m.photoCaptions[i]) || '';
+  lightboxImgEl.src = m.images[i];
+  lightboxImgEl.alt = caption || m.title;
+  lightboxCaptionEl.textContent = caption;
+  lightboxCaptionEl.hidden = !caption;
+  lightboxEl.classList.add('open');
   const hint = photoFanEl.querySelector('.fan-hint');
   if (hint) hint.classList.add('done');
 }
+
+function closePhoto() {
+  lightboxEl.classList.remove('open');
+}
+
+lightboxEl.addEventListener('click', closePhoto);
 
 function buildFan(images, altBase) {
   photoFanEl.innerHTML = '';
@@ -147,7 +149,6 @@ function buildFan(images, altBase) {
   images.forEach((src, i) => {
     const card = document.createElement('div');
     card.className = 'photo-card';
-    card.dataset.i = i;
     card.style.setProperty('--fr', ((i - mid) * step).toFixed(2) + 'deg');
     card.style.transitionDelay = (i * 0.1).toFixed(2) + 's';
     card.style.zIndex = i + 1;
@@ -157,14 +158,14 @@ function buildFan(images, altBase) {
     img.alt = n > 1 ? `${altBase} — photo ${i + 1} of ${n}` : altBase;
     card.appendChild(img);
 
-    card.addEventListener('click', () => liftCard(card));
+    card.addEventListener('click', () => openPhoto(i));
     photoFanEl.appendChild(card);
   });
 
-  if (n > 1) {
+  {
     const hint = document.createElement('p');
     hint.className = 'fan-hint';
-    hint.textContent = 'tap a card';
+    hint.textContent = n > 1 ? 'tap a photo' : 'tap the photo';
     photoFanEl.appendChild(hint);
   }
 
@@ -182,8 +183,7 @@ function openCard(index) {
 
   cardDateEl.textContent = m.date;
   cardTitleEl.textContent = m.title;
-  // the last photo starts on top of the deck, so its caption shows first
-  cardCaptionEl.textContent = captionFor((m.images || [m]).length - 1);
+  cardCaptionEl.textContent = m.caption;
 
   const images = m.images || [];
   photoFanEl.classList.toggle('hidden', images.length === 0);
@@ -196,6 +196,7 @@ function openCard(index) {
 }
 
 function closeCard() {
+  closePhoto();
   overlayEl.classList.remove('open');
   // give the close animation a moment before checking the finale
   setTimeout(() => {
@@ -207,7 +208,8 @@ closeBtnEl.addEventListener('click', closeCard);
 overlayEl.addEventListener('click', (e) => { if (e.target === overlayEl) closeCard(); });
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    if (overlayEl.classList.contains('open')) closeCard();
+    if (lightboxEl.classList.contains('open')) closePhoto();       // photo first, then the card
+    else if (overlayEl.classList.contains('open')) closeCard();
     if (finaleEl.classList.contains('open')) { /* stays until replay, by design */ }
   }
 });
